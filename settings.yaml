@@ -1,0 +1,3 @@
+default:
+  image_size: 256
+
