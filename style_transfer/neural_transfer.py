@@ -7,18 +7,18 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.models as models
 import torchvision.transforms as transforms
 from dynaconf import settings
 from PIL import Image
+from style_transfer.model import ContentLoss, Normalization, StyleLoss
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-logging.debug(f"Using Device {device}")
+logging.info(f"Using Device {device}")
 
 data_path = Path("../data")
 # desired size of the output image
@@ -33,8 +33,8 @@ def image_loader(image_name):
     return image.to(device, torch.float)
 
 
+content_image = image_loader(data_path / "krichner.jpg")
 style_image = image_loader(data_path / "rembrandt.jpg")
-content_image = image_loader(data_path / "paul.jpg")
 
 assert (
     style_image.size() == content_image.size()
@@ -62,47 +62,6 @@ plt.figure()
 imshow(content_image, title="Content Image")
 
 
-class ContentLoss(nn.Module):
-    def __init__(
-        self, target,
-    ):
-        super(ContentLoss, self).__init__()
-        # we 'detach' the target content from the tree used
-        # to dynamically compute the gradient: this is a stated value,
-        # not a variable. Otherwise the forward method of the criterion
-        # will throw an error.
-        self.target = target.detach()
-
-    def forward(self, input):
-        self.loss = F.mse_loss(input, self.target)
-        return input
-
-
-def gram_matrix(input):
-    a, b, c, d = input.size()  # a=batch size(=1)
-    # b=number of feature maps
-    # (c,d)=dimensions of a f. map (N=c*d)
-
-    features = input.view(a * b, c * d)  # resise F_XL into \hat F_XL
-
-    G = torch.mm(features, features.t())  # compute the gram product
-
-    # we 'normalize' the values of the gram matrix
-    # by dividing by the number of element in each feature maps.
-    return G.div(a * b * c * d)
-
-
-class StyleLoss(nn.Module):
-    def __init__(self, target_feature):
-        super(StyleLoss, self).__init__()
-        self.target = gram_matrix(target_feature).detach()
-
-    def forward(self, input):
-        G = gram_matrix(input)
-        self.loss = F.mse_loss(G, self.target)
-        return input
-
-
 cnn = models.vgg19(pretrained=True).features.to(device).eval()
 
 # VGG networks are trained on images with each channel
@@ -112,22 +71,7 @@ cnn = models.vgg19(pretrained=True).features.to(device).eval()
 cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
 cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
-
-class Normalization(nn.Module):
-    def __init__(self, mean, std):
-        super(Normalization, self).__init__()
-        # .view the mean and std to make them [C x 1 x 1] so that they can
-        # directly work with image Tensor of shape [B x C x H x W].
-        # B is batch size. C is number of channels. H is height and W is width.
-        self.mean = torch.tensor(mean).view(-1, 1, 1)
-        self.std = torch.tensor(std).view(-1, 1, 1)
-
-    def forward(self, img):
-        # normalize img
-        return (img - self.mean) / self.std
-
-
-content_layers_default = ["conv_4"]
+content_layers_default = ["conv_5"]
 style_layers_default = ["conv_1", "conv_2", "conv_3", "conv_4", "conv_5"]
 
 
