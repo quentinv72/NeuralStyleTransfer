@@ -23,11 +23,11 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost"])
 # POST request handler for path /api/imgs... User uploads images and receives a generated image as response
 @app.post("/api/imgs")
 async def upload_file(
-    user_image: UploadFile = File(..., title="User Image"),
+    content_image: UploadFile = File(..., title="User Image"),
     style_image: UploadFile = File(..., title="Style Image"),
 ):
     accepted_types = ["image/png", "image/jpeg"]
-    if (user_image.content_type not in accepted_types) or (
+    if (content_image.content_type not in accepted_types) or (
         style_image.content_type not in accepted_types
     ):
         raise HTTPException(400, detail="Image must be either .png or .jpeg/jpg")
