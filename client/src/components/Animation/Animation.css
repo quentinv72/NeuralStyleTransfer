@@ -1,0 +1,79 @@
+.right,
+.left {
+  background-color: grey;
+  height: 400px;
+  width: 400px;
+  position: absolute;
+}
+
+.right {
+  right: 15%;
+  animation: forwards 4s right;
+  animation-delay: 0.4s;
+}
+
+.left {
+  left: 15%;
+  animation: forwards 4s left;
+  animation-delay: 1s;
+}
+
+.middle {
+  background-color: grey;
+  height: 400px;
+  width: 400px;
+  opacity: 0;
+  animation: forwards 2s middle;
+  animation-delay: 5s;
+}
+
+@keyframes left {
+  0% {
+    left: 15%;
+  }
+  70% {
+    left: 50%;
+    margin-left: -200px;
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    left: 50%;
+    margin-left: -200px;
+  }
+}
+
+@keyframes right {
+  0% {
+    right: 15%;
+  }
+  70% {
+    right: 50%;
+    margin-right: -200px;
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    right: 50%;
+    margin-right: -200px;
+  }
+}
+
+@keyframes middle {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .left,
+  .right {
+    display: none;
+  }
+  .middle {
+    animation-delay: 0.5s;
+  }
+}
