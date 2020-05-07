@@ -2,6 +2,8 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useState, useCallback } from "react";
 import ReactCrop, { containCrop } from "react-image-crop";
+import { trackPromise } from "react-promise-tracker";
+import { Link } from "react-router-dom";
 import "./ContentImage.css";
 import "react-image-crop/dist/ReactCrop.css";
 
@@ -32,7 +34,7 @@ export default function ContentImage(props) {
       });
       if (response.ok) {
         const blobResponse = await response.blob();
-        console.log(blobResponse);
+        props.genImg(URL.createObjectURL(blobResponse));
       } else {
         const body = await response.json();
         console.log(body);
@@ -50,7 +52,7 @@ export default function ContentImage(props) {
   const handleClick = async (e) => {
     if (image) {
       const content = getCroppedImg(crop, "content_image.jpeg");
-      const generate = await fetchAPI(content);
+      trackPromise(fetchAPI(content));
     }
   };
 
@@ -108,11 +110,18 @@ export default function ContentImage(props) {
           onChange={handleChangeImage}
           accept='image/png, image/jpeg'
         />
-        <button
-          className='uk-button uk-button-default uk-button-large uk-button-primary'
-          onClick={handleClick}>
-          Generate
-        </button>
+        {image ? (
+          <Link
+            className='uk-button uk-button-default uk-button-large uk-button-primary'
+            onClick={handleClick}
+            to='/download'>
+            Generate
+          </Link>
+        ) : (
+          <button className='uk-button uk-button-default uk-button-large uk-button-primary'>
+            Generate
+          </button>
+        )}
       </div>
     </div>
   );

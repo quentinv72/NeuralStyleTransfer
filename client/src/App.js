@@ -4,9 +4,15 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import "./App.css";
 import StyleImages from "./components/StyleImages/StyleImages";
 import ContentImage from "./components/ContentImage/ContentImage";
+import DownloadPage from "./components/DownloadPage/DownloadPage";
 
 function App() {
   const [styleImage, setStyleImage] = useState(null);
+  const [generatedImage, setGenerateImg] = useState(null);
+
+  const updateGenImg = (str) => {
+    setGenerateImg(str);
+  };
 
   const handleStylePick = (e) => {
     let image = e.target;
@@ -32,7 +38,10 @@ function App() {
           <StyleImages onClick={handleStylePick} />
         </Route>
         <Route path='/content'>
-          <ContentImage styleImage={styleImage} />
+          <ContentImage styleImage={styleImage} genImg={updateGenImg} />
+        </Route>
+        <Route path='/download'>
+          <DownloadPage src={generatedImage} />
         </Route>
       </Switch>
     </BrowserRouter>
