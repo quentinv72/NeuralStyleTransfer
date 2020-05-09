@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
 /* eslint-disable react/jsx-no-comment-textnodes */
-import React, { useState, useCallback } from "react";
-import ReactCrop, { containCrop } from "react-image-crop";
+import React, { useState, useCallback, useEffect } from "react";
+import ReactCrop from "react-image-crop";
 import { trackPromise } from "react-promise-tracker";
 import { Link } from "react-router-dom";
 import "./ContentImage.css";
@@ -10,11 +10,8 @@ import "react-image-crop/dist/ReactCrop.css";
 export default function ContentImage(props) {
   const [image, setImage] = useState(null);
   const [imgRef, setImgRef] = useState(null);
-
-  const [crop, setCrop] = useState({
-    width: 256,
-    height: 256,
-  });
+  const [nopic, setNopic] = useState({ marginTop: "50vh" });
+  const [crop, setCrop] = useState(null);
 
   // API call
   const fetchAPI = async (contentImage) => {
@@ -44,6 +41,21 @@ export default function ContentImage(props) {
     }
   };
 
+  useEffect(() => {
+    if (imgRef) {
+      setCrop({
+        width: 256,
+        height:
+          256 *
+          (imgRef.naturalWidth / imgRef.width) *
+          (imgRef.height / imgRef.naturalHeight),
+        x: 0,
+        y: 0,
+      });
+      setNopic(null);
+    }
+  }, [imgRef]);
+
   const onLoad = useCallback((img) => {
     setImgRef(img);
   }, []);
@@ -62,8 +74,9 @@ export default function ContentImage(props) {
     const canvas = document.createElement("canvas");
     const scaleX = imageCrop.naturalWidth / imageCrop.width;
     const scaleY = imageCrop.naturalHeight / imageCrop.height;
-    canvas.width = Math.ceil(crop.width * scaleX);
-    canvas.height = Math.ceil(crop.height * scaleY);
+    canvas.width = Math.round(crop.width * scaleX);
+
+    canvas.height = Math.round(crop.height * scaleY);
     const ctx = canvas.getContext("2d");
     ctx.drawImage(
       imageCrop,
@@ -105,6 +118,7 @@ export default function ContentImage(props) {
       <div className='uk-flex uk-flex-center uk-margin-top uk-flex-around uk-flex-middle'>
         <input
           type='file'
+          style={nopic}
           id='content-image'
           name='content'
           onChange={handleChangeImage}
@@ -118,7 +132,9 @@ export default function ContentImage(props) {
             Generate
           </Link>
         ) : (
-          <button className='uk-button uk-button-default uk-button-large uk-button-primary'>
+          <button
+            className='uk-button uk-button-default uk-button-large uk-button-primary'
+            style={nopic}>
             Generate
           </button>
         )}

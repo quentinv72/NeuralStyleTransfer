@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import WelcomePage from "./components/WelcomePage/WelcomePage";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Prompt } from "react-router-dom";
 import "./App.css";
 import StyleImages from "./components/StyleImages/StyleImages";
 import ContentImage from "./components/ContentImage/ContentImage";
@@ -41,6 +41,10 @@ function App() {
           <ContentImage styleImage={styleImage} genImg={updateGenImg} />
         </Route>
         <Route path='/download'>
+          <Prompt
+            when={true}
+            message="By leaving this page you will lose all the progress you've made"
+          />
           <DownloadPage src={generatedImage} />
         </Route>
       </Switch>

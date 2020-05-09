@@ -1,9 +1,17 @@
 import React from "react";
 import { usePromiseTracker } from "react-promise-tracker";
-import { css } from "@emotion/core";
 import { PacmanLoader } from "react-spinners";
 const DownloadPage = (props) => {
   const { promiseInProgress } = usePromiseTracker();
+  if (!promiseInProgress && !props.src) {
+    return (
+      <div
+        className='uk-flex uk-flex-center uk-flex-middle'
+        uk-height-viewport='offset-top: true'>
+        <h2 className='uk-text-center'>Something went wrong...</h2>
+      </div>
+    );
+  }
   return (
     <div
       className='uk-flex uk-flex-center uk-flex-middle'

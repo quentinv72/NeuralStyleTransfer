@@ -1,7 +1,12 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState } from "react";
-import jaekPaul from "./jake_paul.png";
+import dancing from "./Images/dancing.jpg";
+import ernst from "./Images/ernst.jpg";
+import krichner from "./Images/krichner.jpg";
+import picasso from "./Images/picasso.jpg";
+import rembrandt from "./Images/rembrandt.jpg";
+
 import { Link } from "react-router-dom";
 import "./StyleImages.css";
 import StyleImage from "./StyleImage";
@@ -13,18 +18,19 @@ export default function StyleImages(props) {
     setClicked(e.target.id);
   };
 
-  const imageURLS = ["test1", "test2", "test3", "test4", "mo", "mol", "i"]; //will use an object id:url
+  const imageURLS = [picasso, rembrandt, ernst, krichner, dancing]; //will use an object id:url
+  const keys = ["picasso", "rembrandt", "ernst", "krichner", "dancing"];
 
   return (
     <div className='uk-container'>
       <h2 className='uk-text-center'>Choose Your Style Image</h2>
       <div className='grid uk-width-7-10'>
-        {imageURLS.map((image) => {
+        {imageURLS.map((image, index) => {
           if (image === clicked) {
             return (
               <StyleImage
-                src={jaekPaul}
-                key={image}
+                src={image}
+                key={keys[index]}
                 onClick={handleClick}
                 clicked={true}
                 id={image}
@@ -33,8 +39,8 @@ export default function StyleImages(props) {
           }
           return (
             <StyleImage
-              src={jaekPaul}
-              key={image}
+              src={image}
+              key={keys[index]}
               onClick={handleClick}
               clicked={false}
               id={image}
