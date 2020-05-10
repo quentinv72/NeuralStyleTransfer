@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import copy
 import logging
+from base64 import b64decode, b64encode
+from io import BytesIO
 from pathlib import Path
 from typing import List, Tuple, Type
 
@@ -13,7 +15,7 @@ import torchvision.models as models
 import torchvision.transforms as transforms
 from dynaconf import settings
 from PIL import Image
-from style_transfer.model import ContentLoss, Normalization, StyleLoss, imshow
+from style_transfer.model import ContentLoss, Normalization, StyleLoss
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,13 +26,27 @@ logging.info(f"Using Device {device}")
 data_path = Path("../data")
 
 
-def image_loader(image_name):
+def image_loader(encoded_image: str) -> torch.Tensor:
+    """
+    Convert a base64 encoded image to a torch tensor
+    :str encoded_image: a string of format base64
+    """
     loader = transforms.Compose(
         [transforms.Resize(settings.IMAGE_SIZE), transforms.ToTensor()]
     )
-    image = Image.open(image_name)
+    image = Image.open(BytesIO(b64decode(encoded_image)))
     image = loader(image).unsqueeze(0)  # add a batch dimension to fit network
     return image.to(device, torch.float)
+
+
+def image_to_base64(image) -> str:
+    """
+    Given a PIL image, encode it to base64
+    :PIL image:
+    """
+    buffered = BytesIO()
+    image.save(buffered, format="JPEG")
+    return b64encode(buffered.getvalue())
 
 
 def get_style_model_and_losses(
@@ -108,14 +124,8 @@ def get_input_optimizer(input_img):
 
 
 def run_style_transfer(
-    cnn,
-    content_img,
-    style_img,
-    input_img,
-    num_steps=300,
-    style_weight=1000000,
-    content_weight=1,
-):
+    cnn, content_img: torch.Tensor, style_img: torch.Tensor, input_img: torch.Tensor,
+) -> torch.Tensor:
     """Run the style transfer."""
     logging.info("Building the style transfer model..")
     model, style_losses, content_losses = get_style_model_and_losses(
@@ -125,7 +135,7 @@ def run_style_transfer(
 
     logging.info("Optimizing..")
     run = [0]
-    while run[0] <= num_steps:
+    while run[0] <= settings.NUMBER_ITERATIONS:
 
         def closure():
             # correct the values of updated input image
@@ -133,16 +143,14 @@ def run_style_transfer(
 
             optimizer.zero_grad()
             model(input_img)
+
             style_score = 0
             content_score = 0
 
             for style_loss in style_losses:
-                style_score += style_loss.loss
+                style_score += style_loss.loss * settings.STYLE_WEIGHT
             for content_loss in content_losses:
-                content_score += content_loss.loss
-
-            style_score *= style_weight
-            content_score *= content_weight
+                content_score += content_loss.loss * settings.CONTENT_WEIGHT
 
             loss = style_score + content_score
             loss.backward()
@@ -167,8 +175,8 @@ def run_style_transfer(
 
 if __name__ == "__main__":
 
-    content_image = "krichner.jpg"
-    style_image = "rembrandt.jpg"
+    content_image = "ernst.jpg"
+    style_image = "brad.jpg"
 
     def imshow(tensor, title=None):
         unloader = transforms.ToPILImage()
@@ -180,13 +188,34 @@ if __name__ == "__main__":
             plt.title(title)
         plt.pause(0.001)  # pause a bit so that plots are updated
 
+    def tensor_to_base64(tensor):
+        unloader = transforms.ToPILImage()
+        image = tensor.cpu()
+        image = image.squeeze(0)
+        image = unloader(image)
+        return image_to_base64(image)
+
     cnn = models.vgg19(pretrained=True).features.to(device).eval()
 
-    content_image = image_loader(data_path / content_image)
-    style_image = image_loader(data_path / style_image)
-    input_img = content_image.clone()
+    content_image = Image.open(data_path / content_image)
+    style_image = Image.open(data_path / style_image)
 
-    output = run_style_transfer(cnn, content_image, style_image, input_img,)
+    # Instead of reading straight from a saved base64 image generate one
+    encoded_content_image = image_to_base64(content_image)
+    encoded_style_image = image_to_base64(style_image)
+
+    content_tensor = image_loader(encoded_content_image)
+    style_tensor = image_loader(encoded_style_image)
+    plt.figure()
+    imshow(content_tensor)
+    imshow(style_tensor)
+    plt.show()
+
+    input_img = content_tensor.clone()
+
+    # Note that the output is a tensor. I'm guessing you want the output to be base64 too,
+    # so i wrote the method tensor_to_base64 to do so.
+    output = run_style_transfer(cnn, content_tensor, style_tensor, input_img,)
 
     plt.figure()
     imshow(output, title="Output Image")
