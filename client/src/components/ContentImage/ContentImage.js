@@ -6,7 +6,7 @@ import { trackPromise } from "react-promise-tracker";
 import { Link } from "react-router-dom";
 import "./ContentImage.css";
 import "react-image-crop/dist/ReactCrop.css";
-
+const axios = require("axios").default;
 export default function ContentImage(props) {
   const [image, setImage] = useState(null);
   const [imgRef, setImgRef] = useState(null);
@@ -16,28 +16,24 @@ export default function ContentImage(props) {
   // API call
   const fetchAPI = async (contentImage) => {
     try {
-      const body = JSON.stringify({
-        content_image: contentImage.replace(/^data:image\/jpeg;base64,/, ""),
-        style_image: props.styleImage.replace(/^data:image\/jpeg;base64,/, ""),
-      });
-
-      const response = await fetch("http://localhost:8000/api/imgs", {
-        body: body,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+      const response = await axios({
+        method: "post",
+        url: "/api/imgs",
+        data: {
+          content_image: contentImage.replace(/^data:image\/jpeg;base64,/, ""),
+          style_image: props.styleImage.replace(
+            /^data:image\/jpeg;base64,/,
+            ""
+          ),
         },
-        method: "POST",
+        timeout: 180000,
       });
-      if (response.ok) {
-        const blobResponse = await response.blob();
-        props.genImg(URL.createObjectURL(blobResponse));
-      } else {
-        const body = await response.json();
-        console.log(body);
+      if (response.statusText === "OK") {
+        const base64GeneratedImage = response.data.imageb64;
+        props.genImg(`data:image/jpeg;base64, ${base64GeneratedImage}`);
       }
     } catch (e) {
-      console.log(e);
+      console.log(e.data);
     }
   };
 
