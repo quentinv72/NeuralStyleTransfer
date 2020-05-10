@@ -1,3 +1,7 @@
 default:
   image_size: 256
+  number_iterations: 300
+  style_weight: 1000000
+  content_weight: 1
+  enviornment: 'DEV' # Let this be either PROD of DEV
 
