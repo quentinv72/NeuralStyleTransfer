@@ -1,3 +1,4 @@
 default:
-  image_size: 256
+  image_size: 32
+  enviornment: 'DEV' # Let this be either PROD of DEV
 
