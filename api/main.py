@@ -31,7 +31,7 @@ app.add_middleware(
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost"])
 
-# Might have to manage some request timeout stuff if algo takes too long to run.. Might be able to handle that on front end though
+
 @app.post("/api/imgs")
 async def images(images: Images = Body(...)):
     try:
@@ -40,7 +40,6 @@ async def images(images: Images = Body(...)):
         content_tensor = image_loader(encoded_content_image)
         style_tensor = image_loader(encoded_style_image)
         input_img = content_tensor.clone()
-        # Add an await for algorithm to run and upload image which will be the file response
         output = run_style_transfer(cnn, content_tensor, style_tensor, input_img,)
         generated_image_b64 = tensor_to_base64(output)
         return {"imageb64": generated_image_b64}
