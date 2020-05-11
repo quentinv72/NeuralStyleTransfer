@@ -3,6 +3,7 @@ import { usePromiseTracker } from "react-promise-tracker";
 import { PacmanLoader } from "react-spinners";
 const DownloadPage = (props) => {
   const { promiseInProgress } = usePromiseTracker();
+  console.log(promiseInProgress);
   if (!promiseInProgress && !props.src) {
     return (
       <div
@@ -36,7 +37,7 @@ const DownloadPage = (props) => {
           <div className='uk-flex uk-flex-center uk-margin'>
             <a
               href={props.src}
-              download
+              download='generated_image.jpeg'
               className='uk-button uk-button-default uk-button-large uk-button-primary'>
               Download
             </a>

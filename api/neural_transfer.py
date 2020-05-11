@@ -14,8 +14,8 @@ import torch.optim as optim
 import torchvision.models as models
 import torchvision.transforms as transforms
 from dynaconf import settings
+from model import ContentLoss, Normalization, StyleLoss
 from PIL import Image
-from style_transfer.model import ContentLoss, Normalization, StyleLoss
 
 logging.basicConfig(level=logging.INFO)
 
@@ -173,6 +173,14 @@ def run_style_transfer(
     return input_img
 
 
+def tensor_to_base64(tensor):
+    unloader = transforms.ToPILImage()
+    image = tensor.cpu()
+    image = image.squeeze(0)
+    image = unloader(image)
+    return image_to_base64(image)
+
+
 if __name__ == "__main__":
 
     content_image = "ernst.jpg"
@@ -187,13 +195,6 @@ if __name__ == "__main__":
         if title is not None:
             plt.title(title)
         plt.pause(0.001)  # pause a bit so that plots are updated
-
-    def tensor_to_base64(tensor):
-        unloader = transforms.ToPILImage()
-        image = tensor.cpu()
-        image = image.squeeze(0)
-        image = unloader(image)
-        return image_to_base64(image)
 
     cnn = models.vgg19(pretrained=True).features.to(device).eval()
 
