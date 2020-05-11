@@ -30,13 +30,13 @@ pip install -r requirements.txt
 cd client && yarn install
 ```
 
-4. Start the client server (make sure you are in the ./client directory)
+4. Start the client server (make sure you are in the `/client` directory)
 
 ```
 yarn start
 ```
 
-5. Start API server. Go to another terminal window and run commands in ./api directory
+5. Start API server. Go to another terminal window and run commands in `/api` directory
 
 ```
 uvicorn main:app --reload
