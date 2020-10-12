@@ -29,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost"])
+# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost"])
 
 
 @app.post("/api/imgs")

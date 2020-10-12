@@ -14,7 +14,7 @@ import torch.optim as optim
 import torchvision.models as models
 import torchvision.transforms as transforms
 from dynaconf import settings
-from model import ContentLoss, Normalization, StyleLoss
+from .model import ContentLoss, Normalization, StyleLoss
 from PIL import Image
 
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +50,9 @@ def image_to_base64(image) -> str:
 
 
 def get_style_model_and_losses(
-    cnn: Type[nn.Module], style_img: torch.Tensor, content_img: torch.Tensor,
+    cnn: Type[nn.Module],
+    style_img: torch.Tensor,
+    content_img: torch.Tensor,
 ) -> Tuple[nn.Module, List[float], List[float]]:
     cnn = copy.deepcopy(cnn)
 
@@ -124,7 +126,10 @@ def get_input_optimizer(input_img):
 
 
 def run_style_transfer(
-    cnn, content_img: torch.Tensor, style_img: torch.Tensor, input_img: torch.Tensor,
+    cnn,
+    content_img: torch.Tensor,
+    style_img: torch.Tensor,
+    input_img: torch.Tensor,
 ) -> torch.Tensor:
     """Run the style transfer."""
     logging.info("Building the style transfer model..")
@@ -216,7 +221,12 @@ if __name__ == "__main__":
 
     # Note that the output is a tensor. I'm guessing you want the output to be base64 too,
     # so i wrote the method tensor_to_base64 to do so.
-    output = run_style_transfer(cnn, content_tensor, style_tensor, input_img,)
+    output = run_style_transfer(
+        cnn,
+        content_tensor,
+        style_tensor,
+        input_img,
+    )
 
     plt.figure()
     imshow(output, title="Output Image")

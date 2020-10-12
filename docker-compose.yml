@@ -3,9 +3,11 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./Dockerfile
-    command: bash
+      dockerfile: ./Dockerfile.dev
+    command: uvicorn --host 0.0.0.0 main:app --reload
     tty: true
     stdin_open: true
     volumes:
       - ./app:/usr/src/app
+    ports:
+      - "8000:8000"
