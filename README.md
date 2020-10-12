@@ -17,11 +17,9 @@ Will generate an image similar to this:
 
 This web app has not yet been deployed. However, if you would like to test it on your local machine, then follow these instructions:
 
-1. Clone the repository
-2. Install requirements for Python
-
+1. Clone the repository and start server on `0.0.0.0:8000`
 ```
-pip install -r requirements.txt
+docker-compose run --service-ports api
 ```
 
 3. Install client packages using yarn
@@ -36,10 +34,5 @@ cd client && yarn install
 yarn start
 ```
 
-5. Start API server. Go to another terminal window and run commands in `/api` directory
-
-```
-uvicorn main:app --reload
-```
 
 6. Finally go to http://localhost:3000 in your browser.
