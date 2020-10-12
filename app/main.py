@@ -5,7 +5,7 @@ import torchvision.models as models
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from neural_transfer import image_loader, run_style_transfer, tensor_to_base64
+from model.neural_transfer import image_loader, run_style_transfer, tensor_to_base64
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -29,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost"])
+# app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost"])
 
 
 @app.post("/api/imgs")
@@ -40,7 +40,12 @@ async def images(images: Images = Body(...)):
         content_tensor = image_loader(encoded_content_image)
         style_tensor = image_loader(encoded_style_image)
         input_img = content_tensor.clone()
-        output = run_style_transfer(cnn, content_tensor, style_tensor, input_img,)
+        output = run_style_transfer(
+            cnn,
+            content_tensor,
+            style_tensor,
+            input_img,
+        )
         generated_image_b64 = tensor_to_base64(output)
         return {"imageb64": generated_image_b64}
     except binascii.Error:
